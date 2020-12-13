@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "513482170965",
+    "project_id": "game-chess",
+    "storage_bucket": "game-chess.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:513482170965:android:87b6cd27bd39d731fc6adc",
+        "android_client_info": {
+          "package_name": "com.example.lab3"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "513482170965-35k85m9bijpnbd7nts5oj7v041frvilj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNOAh7sJevqeotpYkf7JUx_hMkf9y6icY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "513482170965-35k85m9bijpnbd7nts5oj7v041frvilj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

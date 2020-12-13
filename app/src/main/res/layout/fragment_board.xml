@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.lab3.CustomView.ChessBoard xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/chess_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:stroke_width="10"
+    app:light_color="@color/cell_white"
+    app:dark_color="@color/cell_black"
+    app:select_color="@color/cell_active"
+    tools:context=".Fragments.BoardFragment">
+
+
+</com.example.lab3.CustomView.ChessBoard>

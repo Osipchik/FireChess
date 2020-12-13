@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ChessBoard">
+        <attr name="light_color" format="color"/>
+        <attr name="dark_color" format="color"/>
+        <attr name="select_color" format="color"/>
+        <attr name="stroke_width" format="integer"/>
+    </declare-styleable>
+</resources>
