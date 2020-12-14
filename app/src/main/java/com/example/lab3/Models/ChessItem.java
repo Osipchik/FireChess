@@ -8,22 +8,24 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ChessItem {
-    public int row, col;
-    public ChessColor player;
-    public ChessRank rank;
+    private int row, col;
+    private ChessColor player;
+    private ChessRank rank;
     public int resId;
+
+    public ChessItem() {}
 
     public ChessItem(int col, int row, ChessColor player, ChessRank rank){
         this.row = row;
         this.col = col;
         this.player = player;
         this.rank = rank;
-        resId = getResourceId();
+        resId = getResourceId(player, rank);
     }
 
-    private int getResourceId(){
-        if (player == ChessColor.BLACK) {
-            switch (rank) {
+    public static int getResourceId(ChessColor itemPlayer, ChessRank itemRank){
+        if (itemPlayer == ChessColor.BLACK) {
+            switch (itemRank) {
                 case KING: return R.drawable.king_black;
                 case QUEEN: return R.drawable.queen_black;
                 case BISHOP: return R.drawable.bishop_black;
@@ -33,7 +35,7 @@ public class ChessItem {
             }
         }
         else {
-            switch (rank) {
+            switch (itemRank) {
                 case KING: return R.drawable.king_white;
                 case QUEEN: return R.drawable.queen_white;
                 case BISHOP: return R.drawable.bishop_white;
@@ -45,12 +47,38 @@ public class ChessItem {
 
     }
 
-    public Map<String, Object> getMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("rank", rank);
-        map.put("player", player);
-        map.put("col", col);
-        map.put("row", row);
-        return map;
+    public int getRow() {
+        return row;
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+
+    public void setCol(int col) {
+        this.col = col;
+    }
+
+    public ChessColor getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(ChessColor player) {
+        this.player = player;
+    }
+
+    public ChessRank getRank() {
+        return rank;
+    }
+
+    public void setRank(ChessRank rank) {
+        this.rank = rank;
+        if (player != null) {
+            resId = getResourceId(player, rank);
+        }
     }
 }

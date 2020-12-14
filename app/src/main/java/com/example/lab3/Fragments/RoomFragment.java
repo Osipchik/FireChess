@@ -33,8 +33,6 @@ public class RoomFragment extends Fragment {
     private ProgressBar progressBar;
 
     private Button startButton;
-    private Button createButton;
-    private Button connectButton;
     private TextInputEditText inputEditText;
     private TextInputLayout inputLayout;
 
@@ -52,8 +50,8 @@ public class RoomFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_room, container, false);
         startButton = view.findViewById(R.id.start_game_button);
-        createButton = view.findViewById(R.id.create_button);
-        connectButton = view.findViewById(R.id.connect_button);
+        Button createButton = view.findViewById(R.id.create_button);
+        Button connectButton = view.findViewById(R.id.connect_button);
         inputEditText = view.findViewById(R.id.room_Id);
         roomIdView = view.findViewById(R.id.room_Id_view);
         inputLayout = view.findViewById(R.id.room_Id_layout);
@@ -96,6 +94,7 @@ public class RoomFragment extends Fragment {
         Intent intent = new Intent(requireActivity(), ChessActivity.class);
         intent.putExtra(Fields.name, model.getRoomName());
         intent.putExtra(Fields.Id, model.getRoomId());
+        intent.putExtra(Fields.Users, viewModel.getMyId());
         intent.putExtra(Fields.player, model.getPlayer().toString());
         startActivity(intent);
     }

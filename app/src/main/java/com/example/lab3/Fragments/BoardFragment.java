@@ -11,7 +11,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.lab3.CustomView.ChessBoard;
+import com.example.lab3.Dialogs.PawnPromotionDialog;
 import com.example.lab3.Enums.ChessColor;
+import com.example.lab3.Enums.ChessRank;
 import com.example.lab3.Models.ChessItem;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.GameViewModel;
@@ -37,6 +39,8 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
         viewModel.updateView().observe(requireActivity(), i -> {
             board.invalidate();
             viewModel.saveGame();
+            ChessItem item = viewModel.getItemAt(0, 1);
+            Log.d("updateView", item.getPlayer() + "  " + item.getRank());
         });
 
         return view;
@@ -49,56 +53,58 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
 
     @Override
     public void moveTo(ChessItem selectedItem, int currentCol, int currentRow) {
-        switch (selectedItem.rank){
-            case PAWN: movePawn(selectedItem, currentCol, currentRow); break;
-            case BISHOP: moveBishop(selectedItem, currentCol, currentRow); break;
-            case ROOK: moveRook(selectedItem, currentCol, currentRow); break;
-            case QUEEN: moveQueen(selectedItem, currentCol, currentRow); break;
-            case KING: moveKing(selectedItem, currentCol, currentRow); break;
-            case KNIGHT: moveKnight(selectedItem, currentCol, currentRow); break;
+        if (!viewModel.getIsFinished()){
+            switch (selectedItem.getRank()){
+                case PAWN: movePawn(selectedItem, currentCol, currentRow); break;
+                case BISHOP: moveBishop(selectedItem, currentCol, currentRow); break;
+                case ROOK: moveRook(selectedItem, currentCol, currentRow); break;
+                case QUEEN: moveQueen(selectedItem, currentCol, currentRow); break;
+                case KING: moveKing(selectedItem, currentCol, currentRow); break;
+                case KNIGHT: moveKnight(selectedItem, currentCol, currentRow); break;
+            }
         }
     }
 
     private void movePawn(ChessItem selectedItem, int currentCol, int currentRow){
-        int rowDiff = currentRow - selectedItem.row;
-        int colDiff = Math.abs(currentCol - selectedItem.col);
+        int rowDiff = currentRow - selectedItem.getRow();
+        int colDiff = Math.abs(currentCol - selectedItem.getCol());
 
         if ((viewModel.getPlayer() == ChessColor.WHITE && (rowDiff == 1 || rowDiff == 2) ||
                 viewModel.getPlayer() == ChessColor.BLACK && (rowDiff == -1 || rowDiff == -2)) && colDiff <= 1) {
 
             ChessItem piece = pieceAt(currentCol, currentRow);
-            if (piece != null && piece.player != viewModel.getPlayer()){
-                if (currentCol != selectedItem.col && Math.abs(rowDiff) == 1) {
+            if (piece != null && piece.getPlayer() != viewModel.getPlayer()){
+                if (currentCol != selectedItem.getCol() && Math.abs(rowDiff) == 1) {
                     viewModel.removeItem(piece);
-                    viewModel.moveItem(selectedItem, currentCol, currentRow);
+                    viewModel.moveItem(selectedItem, currentCol, currentRow, false);
+                    showPromotionDialog(selectedItem);
                 }
             }
-            else {
-                if (currentCol == selectedItem.col) {
-                    viewModel.moveItem(selectedItem, selectedItem.col, currentRow);
-                }
+            else if (currentCol == selectedItem.getCol()) {
+                viewModel.moveItem(selectedItem, selectedItem.getCol(), currentRow, false);
+                showPromotionDialog(selectedItem);
             }
         }
     }
 
     private void removePiece(int currentCol, int currentRow){
         ChessItem piece = pieceAt(currentCol, currentRow);
-        if (piece != null && piece.player != viewModel.getPlayer()) {
+        if (piece != null && piece.getPlayer() != viewModel.getPlayer()) {
              viewModel.removeItem(piece);
         }
     }
 
     private boolean moveBishop(ChessItem selectedItem, int currentCol, int currentRow) {
-        int rowDiff = Math.abs(currentRow - selectedItem.row);
-        int colDiff = Math.abs(currentCol - selectedItem.col);
+        int rowDiff = Math.abs(currentRow - selectedItem.getRow());
+        int colDiff = Math.abs(currentCol - selectedItem.getCol());
 
         if (rowDiff == colDiff) {
-            int colFactor = selectedItem.col - currentCol > 0 ? -1 : 1;
-            int rowFactor = selectedItem.row - currentRow > 0 ? -1 : 1;
+            int colFactor = selectedItem.getCol() - currentCol > 0 ? -1 : 1;
+            int rowFactor = selectedItem.getRow() - currentRow > 0 ? -1 : 1;
 
-            if (checkPath(colFactor, rowFactor, currentCol, currentRow, selectedItem.col, selectedItem.row)) {
+            if (checkPath(colFactor, rowFactor, currentCol, currentRow, selectedItem.getCol(), selectedItem.getRow())) {
                 removePiece(currentCol, currentRow);
-                viewModel.moveItem(selectedItem, currentCol, currentRow);
+                viewModel.moveItem(selectedItem, currentCol, currentRow, true);
 
                 return true;
             }
@@ -108,14 +114,14 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
     }
 
     private void moveRook(ChessItem selectedItem, int currentCol, int currentRow) {
-        if (currentCol == selectedItem.col || currentRow == selectedItem.row) {
-            int colFactor = Integer.compare(currentCol, selectedItem.col);
-            int rowFactor = Integer.compare(currentRow, selectedItem.row);
+        if (currentCol == selectedItem.getCol() || currentRow == selectedItem.getRow()) {
+            int colFactor = Integer.compare(currentCol, selectedItem.getCol());
+            int rowFactor = Integer.compare(currentRow, selectedItem.getRow());
 
-            if (checkPath(colFactor, rowFactor, currentCol, currentRow, selectedItem.col, selectedItem.row)){
+            if (checkPath(colFactor, rowFactor, currentCol, currentRow, selectedItem.getCol(), selectedItem.getRow())){
                 removePiece(currentCol, currentRow);
 
-                viewModel.moveItem(selectedItem, currentCol, currentRow);
+                viewModel.moveItem(selectedItem, currentCol, currentRow, true);
             }
         }
     }
@@ -128,22 +134,22 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
     }
 
     private void moveKing(ChessItem selectedItem, int currentCol, int currentRow) {
-        int rowDiff = Math.abs(currentRow - selectedItem.row);
-        int colDiff = Math.abs(currentCol - selectedItem.col);
+        int rowDiff = Math.abs(currentRow - selectedItem.getRow());
+        int colDiff = Math.abs(currentCol - selectedItem.getCol());
 
         if (rowDiff <= 1 && colDiff <= 1) {
             removePiece(currentCol, currentRow);
-            viewModel.moveItem(selectedItem, currentCol, currentRow);
+            viewModel.moveItem(selectedItem, currentCol, currentRow, true);
         }
     }
 
     private void moveKnight(ChessItem selectedItem, int currentCol, int currentRow) {
-        int rowDiff = Math.abs(currentRow - selectedItem.row);
-        int colDiff = Math.abs(currentCol - selectedItem.col);
+        int rowDiff = Math.abs(currentRow - selectedItem.getRow());
+        int colDiff = Math.abs(currentCol - selectedItem.getCol());
 
         if ((rowDiff == 2 && colDiff == 1) || (rowDiff == 1 && colDiff == 2)) {
             removePiece(currentCol, currentRow);
-            viewModel.moveItem(selectedItem, currentCol, currentRow);
+            viewModel.moveItem(selectedItem, currentCol, currentRow, true);
         }
     }
 
@@ -162,5 +168,16 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
         }
 
         return true;
+    }
+
+    private void showPromotionDialog(ChessItem item) {
+        if (item.getPlayer() == ChessColor.WHITE && item.getRow() == 7 || item.getPlayer() == ChessColor.BLACK && item.getRow() == 0){
+            PawnPromotionDialog dialog = new PawnPromotionDialog(item);
+            dialog.setCancelable(false);
+            dialog.show(getFragmentManager(), "ChangePawnDialog");
+        }
+        else {
+            viewModel.updateRound();
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.lab3.ViewModels;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -37,26 +38,27 @@ public class RoomViewModel extends AndroidViewModel {
         return connected;
     }
 
+    public String getMyId() {
+        return authenticate.getUserId();
+    }
 
     public void connectToRoom(String key){
-        String roomPath = database.buildPath(new String[]{Fields.Rooms, key, Fields.Users});
+        String roomPath = database.buildPath(new String[]{Fields.Rooms, key});
         database.getReference(roomPath).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    int count = (int) snapshot.getChildrenCount();
-                    if (count < 2 && !snapshot.child(authenticate.getUserId()).exists()) {
-                        String path = database.buildPath(new String[]{roomPath, authenticate.getUserId(), Fields.player});
+                    DataSnapshot usersSnapshot = snapshot.child(Fields.Users);
+                    int count = (int) usersSnapshot.getChildrenCount();
+                    if (count < 2 && !usersSnapshot.child(authenticate.getUserId()).exists()) {
+                        String path = database.buildPath(new String[]{roomPath, Fields.Users, authenticate.getUserId(), Fields.player});
                         database.setValue(path, ChessColor.BLACK).addOnCompleteListener(i -> {
-                            RoomModel m = new RoomModel(snapshot.child(Fields.name).getValue(String.class), key, ChessColor.BLACK);
-                            connected.setValue(m);
+                            connected.setValue(loadModel(key, snapshot, ChessColor.BLACK));
                         });
                     }
-                    else if (count <= 2 && snapshot.child(authenticate.getUserId()).exists()){
-                        ChessColor player = snapshot.child(authenticate.getUserId()).child(Fields.player).getValue(ChessColor.class);
-
-                        RoomModel model = new RoomModel(snapshot.child(Fields.name).getValue(String.class), key, player);
-                        connected.setValue(model);
+                    else if (count <= 2 && usersSnapshot.child(authenticate.getUserId()).exists()){
+                        ChessColor player = usersSnapshot.child(authenticate.getUserId()).child(Fields.player).getValue(ChessColor.class);
+                        connected.setValue(loadModel(key, snapshot, player));
                     }
                     else {
                         connected.setValue(null);
@@ -70,6 +72,10 @@ public class RoomViewModel extends AndroidViewModel {
             @Override
             public void onCancelled(@NonNull DatabaseError error) { }
         });
+    }
+
+    private RoomModel loadModel(String key, DataSnapshot snapshot, ChessColor player) {
+        return new RoomModel(snapshot.child(Fields.name).getValue(String.class), key, player);
     }
 
     public void createRoom(String roomName) {

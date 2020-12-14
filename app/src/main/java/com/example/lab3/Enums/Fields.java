@@ -26,6 +26,8 @@ public class Fields {
     public static final String col = "col";
     public static final String rank = "rank";
     public static final String state = "state";
+    public static final String score = "score";
+    public static final String promotion = "promotion";
 
     public static final String Statistic = "Statistic/";
 

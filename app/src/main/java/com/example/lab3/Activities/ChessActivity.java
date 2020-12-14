@@ -1,25 +1,39 @@
 package com.example.lab3.Activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.ViewModelProviders;
-
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.lab3.Dialogs.ConfirmationDialogFragment;
+import com.example.lab3.Dialogs.PawnPromotionDialog;
 import com.example.lab3.Enums.ChessColor;
+import com.example.lab3.Enums.ChessRank;
 import com.example.lab3.Enums.Fields;
-import com.example.lab3.Models.ModelDatabase;
+import com.example.lab3.Models.ChessItem;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.ChessViewModel;
 import com.example.lab3.ViewModels.GameViewModel;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.Query;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class ChessActivity extends AppCompatActivity implements ConfirmationDialogFragment.ConfirmationListener {
+public class ChessActivity extends AppCompatActivity
+        implements ConfirmationDialogFragment.ConfirmationListener,
+        PawnPromotionDialog.ChangePawnDialogListener {
     private ChessViewModel chessViewModel;
+    private GameViewModel gameViewModel;
+    private RecyclerView rivalRecyclerView, myRecyclerView;
+    ChessColor player;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,27 +41,85 @@ public class ChessActivity extends AppCompatActivity implements ConfirmationDial
         setContentView(R.layout.activity_chess);
 
         Intent postIntent = getIntent();
-        setTitle(postIntent.getStringExtra(Fields.name));
+        String roomName = postIntent.getStringExtra(Fields.name);
+        String myId = postIntent.getStringExtra(Fields.Users);
+        String roomId = postIntent.getStringExtra(Fields.Id);
+        player = ChessColor.valueOf(postIntent.getStringExtra(Fields.player));
+
+        setTitle(roomName);
 
         chessViewModel = ViewModelProviders.of(this).get(ChessViewModel.class);
-        chessViewModel.roomId = postIntent.getStringExtra(Fields.Id);
-        ChessColor player = ChessColor.valueOf(postIntent.getStringExtra(Fields.player));
+        chessViewModel.roomId = roomId;
+        chessViewModel.myId = myId;
+        chessViewModel.roomName = roomName;
 
-        GameViewModel gameViewModel = ViewModelProviders.of(this).get(GameViewModel.class);
-        gameViewModel.roomPath = Fields.Rooms + "/" + chessViewModel.roomId;
-        gameViewModel.init(player);
+        gameViewModel = ViewModelProviders.of(this).get(GameViewModel.class);
+        String roomPath = Fields.Rooms + "/" + chessViewModel.roomId;
+        gameViewModel.init(player, roomPath);
 
         gameViewModel.getMessageId().observe(this, i -> {
             Toast.makeText(this, getString(i), Toast.LENGTH_SHORT).show();
         });
 
-        gameViewModel.getFinish().observe(this, i -> chessViewModel.setStatic());
+        gameViewModel.getFinish().observe(this, this::onFinish);
 
-        findViewById(R.id.button3).setOnClickListener(i -> {
-            chessViewModel.setStatic();
-        });
+        setRecyclerViews();
     }
 
+    private void onFinish(ChessColor i) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(i != player ? getString(R.string.win) : getString(R.string.defeat))
+                .setMessage(R.string.party_over)
+                .setPositiveButton(R.string.ok, null).show();
+
+        int myScore = myRecyclerView.getAdapter().getItemCount();
+        int scoreRival = rivalRecyclerView.getAdapter().getItemCount();
+        chessViewModel.setStatic(myScore, scoreRival, i != player);
+    }
+
+    private void setRecyclerViews() {
+        chessViewModel.addUsersListener();
+        chessViewModel.rivalId().observe(this, i -> {
+            rivalRecyclerView = findViewById(R.id.rival_score);
+            rivalRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+            rivalRecyclerView.setAdapter(getAdapter(i));
+        });
+
+        myRecyclerView = findViewById(R.id.my_score);
+        myRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        myRecyclerView.setAdapter(getAdapter(chessViewModel.myId));
+    }
+
+    private FirebaseRecyclerAdapter<?, ?> getAdapter(String userId) {
+        Query query = chessViewModel.getScoreReference(userId);
+
+        FirebaseRecyclerOptions<Integer> options =
+                new FirebaseRecyclerOptions.Builder<Integer>()
+                        .setQuery(query, snapshot ->  ChessItem.getResourceId(
+                                    snapshot.child(Fields.player).getValue(ChessColor.class),
+                                    snapshot.child(Fields.rank).getValue(ChessRank.class)))
+                        .build();
+
+
+        FirebaseRecyclerAdapter<?, ?> recyclerAdapter = new FirebaseRecyclerAdapter<Integer, ChessActivity.ViewHolder>(options) {
+
+            @Override
+            public ChessActivity.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.score_item, parent, false);
+
+                return new ChessActivity.ViewHolder(view);
+            }
+
+            @Override
+            protected void onBindViewHolder(ChessActivity.ViewHolder holder, final int position, Integer resourceId) {
+                holder.setImage(resourceId);
+            }
+        };
+
+        recyclerAdapter.startListening();
+
+        return recyclerAdapter;
+    }
 
     @Override
     public void onBackPressed() {
@@ -62,4 +134,24 @@ public class ChessActivity extends AppCompatActivity implements ConfirmationDial
 
     @Override
     public void cancelButtonClicked() { }
+
+
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView image;
+
+        public ViewHolder(View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.item_image);
+        }
+
+        public void setImage(int resourceId) {
+            image.setImageResource(resourceId);
+        }
+    }
+
+    @Override
+    public void confirmSelectedClicked(ChessItem item) {
+        gameViewModel.promotion(item);
+        gameViewModel.updateRound();
+    }
 }

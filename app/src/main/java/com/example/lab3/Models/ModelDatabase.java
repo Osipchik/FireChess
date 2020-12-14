@@ -1,6 +1,5 @@
 package com.example.lab3.Models;
 
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -17,6 +16,7 @@ public class ModelDatabase {
     public Task<Void> updateChild(String path, Map<String, Object> values) {
         return database.getReference(path).updateChildren(values);
     }
+
 
     public Task<Void> setValue(String path, Object value) {
         return database.getReference(path).setValue(value);

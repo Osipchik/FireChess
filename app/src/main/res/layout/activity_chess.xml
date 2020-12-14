@@ -32,11 +32,12 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <ListView
-                android:id="@+id/rival_items"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rival_score"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"/>
+                android:layout_height="26dp"
+                android:layout_marginStart="8dp"
+                android:scrollbars="horizontal" />
 
 
         </LinearLayout>
@@ -75,21 +76,15 @@
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <ListView
-                android:id="@+id/my_items"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/my_score"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="8dp"/>
-
+                android:layout_height="26dp"
+                android:layout_marginStart="8dp"
+                android:scrollbars="horizontal" />
 
         </LinearLayout>
 
     </androidx.cardview.widget.CardView>
-
-    <Button
-        android:id="@+id/button3"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Button" />
 
 </LinearLayout>

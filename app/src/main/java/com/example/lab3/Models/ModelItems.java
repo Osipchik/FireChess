@@ -23,7 +23,7 @@ public class ModelItems {
     public ChessItem getItemAt(int col, int row) {
         if (items != null) {
             for (ChessItem item : items) {
-                if (item.row == row && item.col == col){
+                if (item.getRow() == row && item.getCol() == col){
                     return item;
                 }
             }
@@ -35,7 +35,7 @@ public class ModelItems {
     public ChessItem getItemAt(int col, int row, ChessColor player) {
         if (items != null) {
             for (ChessItem item : items) {
-                if (item.row == row && item.col == col && item.player == player){
+                if (item.getRow() == row && item.getCol() == col && item.getPlayer() == player){
                     return item;
                 }
             }

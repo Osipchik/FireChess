@@ -108,7 +108,7 @@ public class ChessBoard extends View {
 
     private void drawHighlightRectangle(Canvas canvas) {
         if (selectedItem != null) {
-            canvas.drawRect(drawRect(selectedItem.col, selectedItem.row), strokePaint);
+            canvas.drawRect(drawRect(selectedItem.getCol(), selectedItem.getRow()), strokePaint);
         }
     }
 
@@ -129,7 +129,7 @@ public class ChessBoard extends View {
 
                 ChessItem piece = chessDelegate.pieceAt(currentCol, currentRow);
                 if (piece != null) {
-                    if (piece.player == player) {
+                    if (piece.getPlayer() == player) {
                         selectedItem = piece;
                     }
                     else if (selectedItem != null) {

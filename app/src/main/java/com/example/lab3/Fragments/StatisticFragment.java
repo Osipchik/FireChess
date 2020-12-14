@@ -1,46 +1,20 @@
 package com.example.lab3.Fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.example.lab3.Models.ModelAuthenticate;
-import com.example.lab3.Models.ModelDatabase;
-import com.example.lab3.Models.Statistic;
 import com.example.lab3.R;
-import com.example.lab3.ViewModels.AccountViewModel;
 import com.example.lab3.ViewModels.StatisticViewModel;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.firebase.ui.database.SnapshotParser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 
 public class StatisticFragment extends Fragment {
-    private RecyclerView recyclerView;
-    private Button button;
-
     private StatisticViewModel viewModel;
 
 
@@ -55,36 +29,43 @@ public class StatisticFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_statistic, container, false);
 
-        button = view.findViewById(R.id.button2);
-        recyclerView = view.findViewById(R.id.statistic_list);
-
+        RecyclerView recyclerView = view.findViewById(R.id.statistic_list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setHasFixedSize(true);
-
-        viewModel.getAdapter().observe(requireActivity(), i -> recyclerView.setAdapter(i));
+        viewModel.getAdapter().observe(requireActivity(), recyclerView::setAdapter);
 
         return view;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public LinearLayout root;
-        public TextView txtTitle;
-        public TextView txtDesc;
+        private final TextView roomName, roomId, status, myScore, rivalScore;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            root = itemView.findViewById(R.id.list_root);
-            txtTitle = itemView.findViewById(R.id.list_title);
-            txtDesc = itemView.findViewById(R.id.list_desc);
+            roomName = itemView.findViewById(R.id.list_title);
+            roomId = itemView.findViewById(R.id.list_Id);
+            status = itemView.findViewById(R.id.status);
+            myScore = itemView.findViewById(R.id.my_score_view);
+            rivalScore = itemView.findViewById(R.id.rival_score_view);
         }
 
-        public void setTxtTitle(String string) {
-            txtTitle.setText(string);
+        public void setRoomName(String string) {
+            roomName.setText(string);
         }
 
+        public void setRoomId(String string) {
+            roomId.setText(string);
+        }
 
-        public void setTxtDesc(String string) {
-            txtDesc.setText(string);
+        public void setStatus(String string) {
+            status.setText(string);
+        }
+
+        public void setMyScore(String string) {
+            myScore.setText(string);
+        }
+
+        public void setRivalScore(String string) {
+            rivalScore.setText(string);
         }
     }
 }

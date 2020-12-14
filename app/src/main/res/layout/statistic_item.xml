@@ -13,24 +13,23 @@
     android:layout_marginTop="8dp">
 
     <LinearLayout
-        android:id="@+id/list_root"
+        android:id="@+id/root_item"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="?attr/selectableItemBackground"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
         android:clickable="true"
         android:focusable="true"
-        android:orientation="horizontal">
+        android:padding="16dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:padding="16dp">
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/list_title"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Title"
                 android:textColor="@android:color/black"
@@ -38,21 +37,82 @@
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/list_desc"
-                android:layout_width="match_parent"
+                android:id="@+id/list_Id"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Description" />
-
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:gravity="right"
+                android:text="TextView" />
         </LinearLayout>
 
-        <ImageView
-            android:id="@+id/userImage"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="16dp"
-            app:srcCompat="@drawable/ic_account" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Me" />
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="TextView" />
+
+            <TextView
+                android:id="@+id/rival"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="right"
+                android:text="Rival" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="4dp"
+            android:weightSum="3"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/my_score_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:text="TextView" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:textAllCaps="true"
+                android:text="Score" />
+
+            <TextView
+                android:id="@+id/rival_score_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:layout_weight="1"
+                android:textColor="@android:color/black"
+                android:gravity="right"
+                android:text="TextView" />
+        </LinearLayout>
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

@@ -33,5 +33,11 @@
     <string name="room_Id_empty">room Id can\'t be empty</string>
     <string name="room_doees_not_exist">room with this Id does not exist</string>
     <string name="game_saved">game saved</string>
+    <string name="select">Select</string>
+    <string name="ok">Ok</string>
+    <string name="win">win</string>
+    <string name="defeat">defeat</string>
+    <string name="party_over">Party is over</string>
+    <string name="replace_pawn">Replace pawn</string>
 
 </resources>
