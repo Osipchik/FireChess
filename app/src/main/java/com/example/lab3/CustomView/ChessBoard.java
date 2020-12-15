@@ -23,6 +23,7 @@ public class ChessBoard extends View {
     private float cellSide = 130f;
     private final int lightColor;
     private final int darkColor;
+//    private final int playerFactor;
 
     private final Map<Integer, Bitmap> bitmaps = new HashMap<>();
     private final Paint boardPaint = new Paint();
@@ -30,12 +31,20 @@ public class ChessBoard extends View {
 
     private ChessItem selectedItem;
 
-    public IChessDelegate chessDelegate;
-    public ChessColor player;
+    private IChessDelegate chessDelegate;
+    private ChessColor player;
+
+    public void setChessDelegate(IChessDelegate chessDelegate) {
+        this.chessDelegate = chessDelegate;
+    }
+
+    public void setPlayer(ChessColor player) {
+        this.player = player;
+    }
 
     public interface IChessDelegate {
-        ChessItem pieceAt(int col, int row);
-        void moveTo(ChessItem piece, int col, int row);
+        ChessItem itemAt(int col, int row);
+        void moveTo(ChessItem selectedItem, int col, int row);
     }
 
     public ChessBoard(Context context, @Nullable AttributeSet attrs) {
@@ -69,26 +78,22 @@ public class ChessBoard extends View {
         originY = (getHeight() - chessBoardSide) / 2f;
 
         drawChessboard(canvas);
-        drawPieces(canvas);
+        drawItems(canvas);
         drawHighlightRectangle(canvas);
     }
 
 
-    private void drawPieces(Canvas canvas) {
+    private void drawItems(Canvas canvas) {
         for (int row = 0; row <= 7; row++) {
             for (int col = 0; col <= 7; col++) {
-                ChessItem item = chessDelegate.pieceAt(col, row);
+                ChessItem item = chessDelegate.itemAt(col, row);
                 if (item != null) {
-                    drawPieceAt(canvas, col, row, item.resId);
+                    canvas.drawBitmap(bitmaps.get(item.resId), null, drawRect(col, row), boardPaint);
                 }
             }
         }
     }
 
-    private void drawPieceAt(Canvas canvas, int col, int row, int resID) {
-        Bitmap bitmap = bitmaps.get(resID);
-        canvas.drawBitmap(bitmap, null, drawRect(col, row), boardPaint);
-    }
 
     private void drawChessboard(Canvas canvas) {
         for (int row = 0; row <= 7; row++) {
@@ -127,10 +132,10 @@ public class ChessBoard extends View {
                 int currentCol = (int) ((x - originX) / cellSide);
                 int currentRow = (int) ((y - originY) / cellSide);
 
-                ChessItem piece = chessDelegate.pieceAt(currentCol, currentRow);
-                if (piece != null) {
-                    if (piece.getPlayer() == player) {
-                        selectedItem = piece;
+                ChessItem item = chessDelegate.itemAt(currentCol, currentRow);
+                if (item != null) {
+                    if (item.getPlayer() == player) {
+                        selectedItem = item;
                     }
                     else if (selectedItem != null) {
                         chessDelegate.moveTo(selectedItem, currentCol, currentRow);

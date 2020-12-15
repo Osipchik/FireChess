@@ -8,10 +8,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.lab3.Enums.Fields;
 import com.example.lab3.Models.ModelAuthenticate;
 import com.example.lab3.Models.ModelDatabase;
 import com.example.lab3.Models.ModelStorage;
+import com.example.lab3.Models.UserModel;
 import com.example.lab3.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -27,7 +27,7 @@ public class AccountViewModel extends AndroidViewModel {
     private final MutableLiveData<String> userName = new MutableLiveData<>();
     private final MutableLiveData<String> email = new MutableLiveData<>();
     private final MutableLiveData<Uri> imageUri = new MutableLiveData<>();
-    private final MutableLiveData<Boolean> isFirebase = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isGravatar = new MutableLiveData<>();
     private Uri previousImageUri;
 
     private final MutableLiveData<Integer> messageId = new MutableLiveData<>();
@@ -45,17 +45,15 @@ public class AccountViewModel extends AndroidViewModel {
         database = new ModelDatabase();
         storage = new ModelStorage();
 
-        userPath = Fields.Users + authenticate.getUserId();
+        userPath = "Users/" + authenticate.getUserId();
     }
 
     public void logout(){
         authenticate.signOut();
     }
 
-    public void setName(String name){
-        if (userName != null){
-            userName.setValue(name);
-        }
+    public void setName(String name) {
+        userName.setValue(name);
     }
 
     public LiveData<String> getUserName() {
@@ -70,8 +68,8 @@ public class AccountViewModel extends AndroidViewModel {
         return imageUri;
     }
 
-    public LiveData<Boolean> getIsFirebase() {
-        return isFirebase;
+    public LiveData<Boolean> getIsGravatar() {
+        return isGravatar;
     }
 
     public LiveData<Integer> getMessageId() {
@@ -79,65 +77,66 @@ public class AccountViewModel extends AndroidViewModel {
     }
 
     public void setImageUri(Uri Image) {
-        previousImageUri = imageUri.getValue();
+        if (!imageUri.getValue().getHost().equals("s.gravatar.com")) {
+            previousImageUri = imageUri.getValue();
+        }
         imageUri.setValue(Image);
     }
 
-    public void setIsFirebase(boolean b){
-        isFirebase.setValue(b);
-
-        if (b){
-
-        }
+    public void setIsGravatar(boolean b) {
+        isGravatar.setValue(b);
     }
 
     public void loadData() {
-        ValueEventListener profileListener = new ValueEventListener() {
+        database.getReference(userPath).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                userName.setValue(snapshot.child(Fields.userName).getValue(String.class));
-                imageUri.setValue(Uri.parse(snapshot.child(Fields.profileImage).getValue(String.class)));
-                email.setValue(snapshot.child(Fields.email).getValue(String.class));
-                isFirebase.setValue(snapshot.child(Fields.isFirebase).getValue(Boolean.class));
+                UserModel user = snapshot.getValue(UserModel.class);
+
+                userName.setValue(user.getUserName());
+                imageUri.setValue(Uri.parse(user.getProfileImage()));
+                isGravatar.setValue(user.isGravatar());
+                email.setValue(user.getEmail());
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        };
-
-        database.getReference(userPath).addValueEventListener(profileListener);
+            public void onCancelled(@NonNull DatabaseError error) { }
+        });
     }
 
     public void updateProfile() {
-        uploadImage();
+        if (!isGravatar.getValue()) {
+            uploadImage();
+        }
+        else {
+            previousImageUri = null;
+            String hash = toMd5Hash(authenticate.getEmail());
+            updateImage(Uri.parse("https://s.gravatar.com/avatar/" + hash + "?s=96"));
+        }
 
         Map<String, Object> data = new HashMap<>();
-        data.put(Fields.userName, userName.getValue());
-        data.put(Fields.isFirebase, isFirebase.getValue());
+        data.put("userName", userName.getValue());
+        data.put("gravatar", isGravatar.getValue());
 
         updateData(data);
     }
 
-    private void updateData(Map<String, Object> data){
+    private void updateData(Map<String, Object> data) {
         database.updateChild(userPath, data).addOnCompleteListener(i -> {
             int message = i.isSuccessful() ? R.string.success_update_toast : R.string.failed_update_toast;
             messageId.setValue(message);
         });
     }
 
-    private void updateImage(Uri uri){
+    private void updateImage(Uri uri) {
         imageUri.setValue(uri);
-        previousImageUri = null;
 
         Map<String, Object> data = new HashMap<>();
-        data.put(Fields.profileImage, imageUri.getValue().toString());
+        data.put("profileImage", imageUri.getValue().toString());
         updateData(data);
     }
 
-    private void uploadImage()
-    {
+    private void uploadImage() {
         if (previousImageUri != null) {
             final StorageReference saveReference = storage.getReference().child("images/" + UUID.randomUUID().toString());
 
@@ -150,8 +149,9 @@ public class AccountViewModel extends AndroidViewModel {
             }).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     updateImage(task.getResult());
-
-                    storage.getReferenceFromUrl(previousImageUri.toString()).delete();
+                    StorageReference desertRef = storage.getReferenceFromUrl(previousImageUri);
+                    desertRef.delete();
+                    previousImageUri = null;
                 }
             });
         }

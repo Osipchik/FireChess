@@ -20,7 +20,6 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import com.example.lab3.Activities.MainActivity;
 import com.example.lab3.Activities.SignInActivity;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.AccountViewModel;
@@ -67,7 +66,7 @@ public class AccountFragment extends Fragment {
         accountViewModel.getEmail().observe(requireActivity(), emailView::setText);
         accountViewModel.getUserName().observe(requireActivity(), i -> userNameEditText.setText(i));
         accountViewModel.getImageUri().observe(requireActivity(), i -> Picasso.get().load(i).into(profileImage));
-        accountViewModel.getIsFirebase().observe(requireActivity(), imageSwitch::setChecked);
+        accountViewModel.getIsGravatar().observe(requireActivity(), imageSwitch::setChecked);
 
         accountViewModel.getMessageId().observe(requireActivity(), i -> Toast.makeText(requireActivity(), getString(i), Toast.LENGTH_SHORT).show());
 
@@ -82,7 +81,6 @@ public class AccountFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-
         userNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
@@ -100,8 +98,8 @@ public class AccountFragment extends Fragment {
     }
 
     private void onCheckChange(CompoundButton compoundButton, boolean b) {
-        uploadButton.setVisibility(b ? View.VISIBLE : View.GONE);
-        accountViewModel.setIsFirebase(b);
+        uploadButton.setVisibility(b ? View.GONE : View.VISIBLE);
+        accountViewModel.setIsGravatar(b);
     }
 
     private void applyChanges(View view) {

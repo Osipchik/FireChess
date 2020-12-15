@@ -10,11 +10,10 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.lab3.Enums.Fields;
 import com.example.lab3.Fragments.StatisticFragment;
 import com.example.lab3.Models.ModelAuthenticate;
 import com.example.lab3.Models.ModelDatabase;
-import com.example.lab3.Models.Statistic;
+import com.example.lab3.Models.StatisticItem;
 import com.example.lab3.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -35,18 +34,18 @@ public class StatisticViewModel extends AndroidViewModel {
         ModelAuthenticate authenticate = new ModelAuthenticate();
         database = new ModelDatabase();
 
-        path = Fields.Statistic + "/" + authenticate.getUserId();
+        path = "Statistic/" + authenticate.getUserId();
         fetch();
     }
 
     public void fetch(){
         Query query = database.getReference(path);
 
-        FirebaseRecyclerOptions<Statistic> options =
-                new FirebaseRecyclerOptions.Builder<Statistic>()
-                        .setQuery(query, Statistic.class).build();
+        FirebaseRecyclerOptions<StatisticItem> options =
+                new FirebaseRecyclerOptions.Builder<StatisticItem>()
+                        .setQuery(query, StatisticItem.class).build();
 
-        FirebaseRecyclerAdapter<?, ?> recyclerAdapter = new FirebaseRecyclerAdapter<Statistic, StatisticFragment.ViewHolder>(options) {
+        FirebaseRecyclerAdapter<?, ?> recyclerAdapter = new FirebaseRecyclerAdapter<StatisticItem, StatisticFragment.ViewHolder>(options) {
             @Override
             public StatisticFragment.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
                 View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.statistic_item, parent, false);
@@ -56,10 +55,10 @@ public class StatisticViewModel extends AndroidViewModel {
 
 
             @Override
-            protected void onBindViewHolder(StatisticFragment.ViewHolder holder, final int position, Statistic model) {
+            protected void onBindViewHolder(StatisticFragment.ViewHolder holder, final int position, StatisticItem model) {
                 holder.setRoomName(model.getRoomName());
                 holder.setRoomId(model.getRoomId());
-                holder.setStatus(model.isWinner() ? "win" : "defeat");
+                holder.setStatus(model.isWinner());
                 holder.setMyScore(model.getMyScore());
                 holder.setRivalScore(model.getRivalScore());
             }

@@ -5,7 +5,6 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProviders;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import android.view.ViewGroup;
 import com.example.lab3.CustomView.ChessBoard;
 import com.example.lab3.Dialogs.PawnPromotionDialog;
 import com.example.lab3.Enums.ChessColor;
-import com.example.lab3.Enums.ChessRank;
 import com.example.lab3.Models.ChessItem;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.GameViewModel;
@@ -33,21 +31,19 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
         View view = inflater.inflate(R.layout.fragment_board, container, false);
 
         ChessBoard board = view.findViewById(R.id.chess_view);
-        board.chessDelegate = this;
-        board.player = viewModel.getPlayer();
+        board.setChessDelegate(this);
+        board.setPlayer(viewModel.getPlayer());
 
         viewModel.updateView().observe(requireActivity(), i -> {
             board.invalidate();
             viewModel.saveGame();
-            ChessItem item = viewModel.getItemAt(0, 1);
-            Log.d("updateView", item.getPlayer() + "  " + item.getRank());
         });
 
         return view;
     }
 
     @Override
-    public ChessItem pieceAt(int col, int row) {
+    public ChessItem itemAt(int col, int row) {
         return viewModel.getItemAt(col, row);
     }
 
@@ -72,7 +68,7 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
         if ((viewModel.getPlayer() == ChessColor.WHITE && (rowDiff == 1 || rowDiff == 2) ||
                 viewModel.getPlayer() == ChessColor.BLACK && (rowDiff == -1 || rowDiff == -2)) && colDiff <= 1) {
 
-            ChessItem piece = pieceAt(currentCol, currentRow);
+            ChessItem piece = itemAt(currentCol, currentRow);
             if (piece != null && piece.getPlayer() != viewModel.getPlayer()){
                 if (currentCol != selectedItem.getCol() && Math.abs(rowDiff) == 1) {
                     viewModel.removeItem(piece);
@@ -88,7 +84,7 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
     }
 
     private void removePiece(int currentCol, int currentRow){
-        ChessItem piece = pieceAt(currentCol, currentRow);
+        ChessItem piece = itemAt(currentCol, currentRow);
         if (piece != null && piece.getPlayer() != viewModel.getPlayer()) {
              viewModel.removeItem(piece);
         }

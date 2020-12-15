@@ -33,13 +33,4 @@ public class ModelDatabase {
     public void remove(String path) {
         database.getReference(path).removeValue();
     }
-
-    public String buildPath(String[] chains){
-        StringBuilder path = new StringBuilder();
-        for(String i : chains) {
-            path.append("/").append(i);
-        }
-
-        return path.toString();
-    }
 }

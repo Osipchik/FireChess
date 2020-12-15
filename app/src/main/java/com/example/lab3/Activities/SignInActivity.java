@@ -7,14 +7,11 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProviders;
 
-import com.example.lab3.Enums.Fields;
-import com.example.lab3.Models.ModelAuthenticate;
-import com.example.lab3.Models.ModelDatabase;
-import com.example.lab3.Models.UserModel;
 import com.example.lab3.R;
+import com.example.lab3.ViewModels.AuthenticateViewModel;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -22,40 +19,27 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.ValueEventListener;
 
 public class SignInActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
-
-    private ModelAuthenticate authenticate;
-    private ModelDatabase database;
-
     private GoogleSignInClient mGoogleSignInClient;
-
-    private TextView status, detail;
-//    private com.google.android.gms.common.SignInButton signInButton;
-
+    private TextView status;
     private Button signInButton;
-
     private ProgressBar progressBar;
+    private AuthenticateViewModel authenticate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
-        authenticate = new ModelAuthenticate();
-        database = new ModelDatabase();
+
+        authenticate = ViewModelProviders.of(this).get(AuthenticateViewModel.class);
 
         signInButton = findViewById(R.id.signInButton);
         progressBar = findViewById(R.id.progressBar);
 
 
         status = findViewById(R.id.status);
-        detail = findViewById(R.id.detail);
 
         signInButton.setOnClickListener(this::signIn);
 
@@ -98,23 +82,9 @@ public class SignInActivity extends AppCompatActivity {
 
     private void firebaseAuthWithGoogle(String idToken) {
         progressBar.setVisibility(ProgressBar.VISIBLE);
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        authenticate.signIn(credential, task -> {
+        authenticate.googleSignIn(idToken, task -> {
             if (task.isSuccessful()) {
-                database.getReference(Fields.Users + authenticate.getUserId())
-                        .child(Fields.profileImage)
-                        .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                if (!snapshot.exists()){
-                                    UserModel user = authenticate.getUserModel();
-                                    database.setValue(Fields.Users + authenticate.getUserId(), user);
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) { }
-                        });
+                authenticate.createUser();
                 startMainActivity();
             }
             else {
@@ -135,7 +105,6 @@ public class SignInActivity extends AppCompatActivity {
     private void updateUI() {
         progressBar.setVisibility(ProgressBar.INVISIBLE);
         status.setText(R.string.signed_out);
-        detail.setText(null);
 
         signInButton.setVisibility(View.VISIBLE);
     }

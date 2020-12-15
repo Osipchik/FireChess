@@ -1,7 +1,6 @@
 package com.example.lab3.ViewModels;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -10,11 +9,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.example.lab3.Enums.ChessColor;
 import com.example.lab3.Enums.ChessRank;
-import com.example.lab3.Enums.Fields;
 import com.example.lab3.Models.ChessItem;
 import com.example.lab3.Models.ModelAuthenticate;
 import com.example.lab3.Models.ModelDatabase;
-import com.example.lab3.Models.ModelItems;
+import com.example.lab3.Models.ModelChessItems;
 import com.example.lab3.R;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,7 +28,7 @@ public class GameViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> messageId = new MutableLiveData<>();
     private final MutableLiveData<Boolean> updateView = new MutableLiveData<>();
     private final ModelDatabase database;
-    private final ModelItems items;
+    private final ModelChessItems items;
 
     private ChessColor player;
     private Boolean isLocked;
@@ -40,7 +38,7 @@ public class GameViewModel extends AndroidViewModel {
     public GameViewModel(@NonNull Application application) {
         super(application);
 
-        items = new ModelItems();
+        items = new ModelChessItems();
 
         database = new ModelDatabase();
         isLocked = true;
@@ -64,13 +62,10 @@ public class GameViewModel extends AndroidViewModel {
 
     public void removeItem(ChessItem item) {
         if (!isLocked) {
-            String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.remove});
-            database.setValue(path, item);
-
             ModelAuthenticate authenticate = new ModelAuthenticate();
-            path = database.buildPath(new String[]{roomPath, Fields.Users, authenticate.getUserId(), Fields.score, (new Date().toString())});
 
-            database.setValue(path, item);
+            database.setValue(roomPath + "/game/remove", item);
+            database.setValue(roomPath +"/Users/" + authenticate.getUserId() + "/score/" + new Date(), item);
         }
     }
 
@@ -81,12 +76,11 @@ public class GameViewModel extends AndroidViewModel {
             }
 
             Map<String, Object> map = new HashMap<>();
-            map.put(Fields.fromCol, item.getCol());
-            map.put(Fields.fromRow, item.getRow());
-            map.put(Fields.toCol, col);
-            map.put(Fields.toRow, row);
-            String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.move});
-            database.setValue(path, map);
+            map.put("fromCol", item.getCol());
+            map.put("fromRow", item.getRow());
+            map.put("toCol", col);
+            map.put("toRow", row);
+            database.setValue(roomPath +"/game/move", map);
 
             item.setRow(row);
             item.setCol(col);;
@@ -98,8 +92,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void updateRound(){
         isLocked = true;
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.round});
-        database.setValue(path, player);
+        database.setValue(roomPath + "/game/round", player);
     }
 
     public LiveData<ChessColor> getFinish() {
@@ -112,14 +105,13 @@ public class GameViewModel extends AndroidViewModel {
 
     public void saveGame() {
         if (player == ChessColor.WHITE) {
-            String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.state});
-            database.setValue(path, items.getItems());
+            database.setValue(roomPath + "/game/state", items.getItems());
         }
     }
 
-    public void init(ChessColor player, String roomPath) {
+    public void init(ChessColor player, String roomId) {
         this.player = player;
-        this.roomPath = roomPath;
+        this.roomPath = "Rooms/" + roomId;
 
         loadLasGame();
         loadRound();
@@ -129,8 +121,8 @@ public class GameViewModel extends AndroidViewModel {
         database.getReference(roomPath).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                isFinished = snapshot.child(Fields.finished).getValue(boolean.class);
-                loadField(snapshot.child(Fields.game).child(Fields.state));
+                isFinished = snapshot.child("finished").getValue(boolean.class);
+                loadField(snapshot.child("game").child("state"));
             }
 
             @Override
@@ -143,10 +135,7 @@ public class GameViewModel extends AndroidViewModel {
 
         if (snapshot.exists()) {
             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                piecesBox.add(new ChessItem(dataSnapshot.child(Fields.col).getValue(int.class),
-                        dataSnapshot.child(Fields.row).getValue(int.class),
-                        dataSnapshot.child(Fields.player).getValue(ChessColor.class),
-                        dataSnapshot.child(Fields.rank).getValue(ChessRank.class)));
+                piecesBox.add(dataSnapshot.getValue(ChessItem.class));
             }
         }
         else {
@@ -164,8 +153,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void loadRound() {
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.round});
-        database.getReference(path).addValueEventListener(new ValueEventListener() {
+        database.getReference(roomPath + "/game/round").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()){
@@ -183,18 +171,17 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void moveItemListening() {
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.move});
-        database.getReference(path).addValueEventListener(new ValueEventListener() {
+        database.getReference(roomPath + "/game/move").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    int fromCol = snapshot.child(Fields.fromCol).getValue(int.class);
-                    int fromRow = snapshot.child(Fields.fromRow).getValue(int.class);
+                    int fromCol = snapshot.child("fromCol").getValue(int.class);
+                    int fromRow = snapshot.child("fromRow").getValue(int.class);
 
                     ChessItem item = items.getItemAt(fromCol, fromRow);
                     if (item != null) {
-                        item.setRow(snapshot.child(Fields.toRow).getValue(int.class));
-                        item.setCol(snapshot.child(Fields.toCol).getValue(int.class));
+                        item.setRow(snapshot.child("toRow").getValue(int.class));
+                        item.setCol(snapshot.child("toCol").getValue(int.class));
                         updateView.setValue(true);
                     }
                 }
@@ -206,14 +193,13 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void removeItemListening() {
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.remove});
-        database.getReference(path).addValueEventListener(new ValueEventListener() {
+        database.getReference(roomPath + "/game/remove").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
-                    int fromCol = snapshot.child(Fields.col).getValue(int.class);
-                    int fromRow = snapshot.child(Fields.row).getValue(int.class);
-                    ChessColor color = snapshot.child(Fields.player).getValue(ChessColor.class);
+                    int fromCol = snapshot.child("col").getValue(int.class);
+                    int fromRow = snapshot.child("row").getValue(int.class);
+                    ChessColor color = snapshot.child("player").getValue(ChessColor.class);
 
                     ChessItem item = items.getItemAt(fromCol, fromRow, color);
                     if (item != null) {
@@ -222,8 +208,8 @@ public class GameViewModel extends AndroidViewModel {
 
                         if (item.getRank() == ChessRank.KING) {
                             isLocked = true;
-                            setFinish(item.getPlayer());
                             isFinished = true;
+                            setFinish(item.getPlayer());
                         }
                     }
                 }
@@ -235,8 +221,7 @@ public class GameViewModel extends AndroidViewModel {
     }
 
     private void promotionListening() {
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.promotion});
-        database.getReference(path).addValueEventListener(new ValueEventListener() {
+        database.getReference(roomPath + "/game/promotion").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (snapshot.exists()) {
@@ -261,13 +246,12 @@ public class GameViewModel extends AndroidViewModel {
     private void setFinish(ChessColor player) {
         finish.setValue(player == ChessColor.BLACK ? ChessColor.BLACK : ChessColor.WHITE);
         Map<String, Object> values = new HashMap<>();
-        values.put(Fields.finished, true);
+        values.put("finished", true);
 
         database.updateChild(roomPath, values);
     }
 
     public void promotion(ChessItem item) {
-        String path = database.buildPath(new String[]{roomPath, Fields.game, Fields.promotion});
-        database.setValue(path, item);
+        database.setValue(roomPath +"/game/promotion", item);
     }
 }

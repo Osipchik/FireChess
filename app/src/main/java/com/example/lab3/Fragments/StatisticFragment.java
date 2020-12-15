@@ -1,5 +1,6 @@
 package com.example.lab3.Fragments;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,6 +39,7 @@ public class StatisticFragment extends Fragment {
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView roomName, roomId, status, myScore, rivalScore;
+        private final Resources resources;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -46,26 +48,27 @@ public class StatisticFragment extends Fragment {
             status = itemView.findViewById(R.id.status);
             myScore = itemView.findViewById(R.id.my_score_view);
             rivalScore = itemView.findViewById(R.id.rival_score_view);
+            resources = itemView.getResources();
         }
 
-        public void setRoomName(String string) {
-            roomName.setText(string);
+        public void setRoomName(String name) {
+            roomName.setText(name);
         }
 
-        public void setRoomId(String string) {
-            roomId.setText(string);
+        public void setRoomId(String id) {
+            roomId.setText(id);
         }
 
-        public void setStatus(String string) {
-            status.setText(string);
+        public void setStatus(boolean isWinner) {
+            status.setText(isWinner ? resources.getString(R.string.win) : resources.getString(R.string.defeat));
         }
 
-        public void setMyScore(String string) {
-            myScore.setText(string);
+        public void setMyScore(String score) {
+            myScore.setText(score);
         }
 
-        public void setRivalScore(String string) {
-            rivalScore.setText(string);
+        public void setRivalScore(String score) {
+            rivalScore.setText(score);
         }
     }
 }

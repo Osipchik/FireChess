@@ -18,7 +18,6 @@ import com.example.lab3.Dialogs.ConfirmationDialogFragment;
 import com.example.lab3.Dialogs.PawnPromotionDialog;
 import com.example.lab3.Enums.ChessColor;
 import com.example.lab3.Enums.ChessRank;
-import com.example.lab3.Enums.Fields;
 import com.example.lab3.Models.ChessItem;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.ChessViewModel;
@@ -41,21 +40,21 @@ public class ChessActivity extends AppCompatActivity
         setContentView(R.layout.activity_chess);
 
         Intent postIntent = getIntent();
-        String roomName = postIntent.getStringExtra(Fields.name);
-        String myId = postIntent.getStringExtra(Fields.Users);
-        String roomId = postIntent.getStringExtra(Fields.Id);
-        player = ChessColor.valueOf(postIntent.getStringExtra(Fields.player));
+        String roomName = postIntent.getStringExtra("roomName");
+        String myId = postIntent.getStringExtra("Users");
+        String roomId = postIntent.getStringExtra("roomId");
+        player = ChessColor.valueOf(postIntent.getStringExtra("player"));
 
         setTitle(roomName);
 
         chessViewModel = ViewModelProviders.of(this).get(ChessViewModel.class);
-        chessViewModel.roomId = roomId;
+        chessViewModel.setRoomId(roomId);
         chessViewModel.myId = myId;
         chessViewModel.roomName = roomName;
 
         gameViewModel = ViewModelProviders.of(this).get(GameViewModel.class);
-        String roomPath = Fields.Rooms + "/" + chessViewModel.roomId;
-        gameViewModel.init(player, roomPath);
+//        String roomPath = Fields.Rooms + "/" + chessViewModel.roomId;
+        gameViewModel.init(player, roomId);
 
         gameViewModel.getMessageId().observe(this, i -> {
             Toast.makeText(this, getString(i), Toast.LENGTH_SHORT).show();
@@ -95,9 +94,9 @@ public class ChessActivity extends AppCompatActivity
 
         FirebaseRecyclerOptions<Integer> options =
                 new FirebaseRecyclerOptions.Builder<Integer>()
-                        .setQuery(query, snapshot ->  ChessItem.getResourceId(
-                                    snapshot.child(Fields.player).getValue(ChessColor.class),
-                                    snapshot.child(Fields.rank).getValue(ChessRank.class)))
+                        .setQuery(query.orderByKey(), snapshot ->  ChessItem.getResourceId(
+                                    snapshot.child("player").getValue(ChessColor.class),
+                                    snapshot.child("rank").getValue(ChessRank.class)))
                         .build();
 
 

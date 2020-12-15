@@ -2,7 +2,7 @@ package com.example.lab3.Models;
 
 import android.net.Uri;
 
-import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,15 +31,15 @@ public class ModelAuthenticate {
     }
 
     public UserModel getUserModel(){
-        return new UserModel(getUserName(), getProfileImage().toString(), getEmail(), true);
+        return new UserModel(getUserName(), getProfileImage().toString(), getEmail(), false);
     }
 
     public void signOut() {
         mAuth.signOut();
     }
 
-    public void signIn(AuthCredential credential, OnCompleteListener<AuthResult> callback){
-        mAuth.signInWithCredential(credential).addOnCompleteListener(callback);
+    public Task<AuthResult> signIn(AuthCredential credential){
+        return mAuth.signInWithCredential(credential);
     }
 
     public boolean isAuthenticated(){

@@ -47,8 +47,8 @@
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/listFragment"
         android:name="com.example.lab3.Fragments.BoardFragment"
-        android:layout_width="394dp"
-        android:layout_height="394dp"
+        android:layout_width="370dp"
+        android:layout_height="370dp"
         android:padding="2dp"
         android:background="@drawable/field_border"
         android:layout_gravity="center"/>

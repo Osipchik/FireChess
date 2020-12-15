@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProviders;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,9 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.lab3.Activities.ChessActivity;
-import com.example.lab3.Enums.ChessColor;
-import com.example.lab3.Enums.Fields;
-import com.example.lab3.Models.RoomModel;
+import com.example.lab3.Models.ModelRoom;
 import com.example.lab3.R;
 import com.example.lab3.ViewModels.RoomViewModel;
 import com.google.android.material.textfield.TextInputEditText;
@@ -89,13 +86,13 @@ public class RoomFragment extends Fragment {
     };
 
     private void onStartClick(View i) {
-        RoomModel model = viewModel.isConnected().getValue();
+        ModelRoom model = viewModel.isConnected().getValue();
 
         Intent intent = new Intent(requireActivity(), ChessActivity.class);
-        intent.putExtra(Fields.name, model.getRoomName());
-        intent.putExtra(Fields.Id, model.getRoomId());
-        intent.putExtra(Fields.Users, viewModel.getMyId());
-        intent.putExtra(Fields.player, model.getPlayer().toString());
+        intent.putExtra("roomName", model.getRoomName());
+        intent.putExtra("roomId", model.getRoomId());
+        intent.putExtra("Users", viewModel.getMyId());
+        intent.putExtra("player", model.getPlayer().toString());
         startActivity(intent);
     }
 
@@ -123,7 +120,7 @@ public class RoomFragment extends Fragment {
         }
     }
 
-    private void onConnected(RoomModel model) {
+    private void onConnected(ModelRoom model) {
         progressBar.setVisibility(ProgressBar.INVISIBLE);
         if (model != null) {
             Toast.makeText(requireActivity(), getString(R.string.connected), Toast.LENGTH_SHORT).show();

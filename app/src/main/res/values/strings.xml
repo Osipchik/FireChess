@@ -2,7 +2,7 @@
     <string name="app_name">Lab3</string>
 
     <string name="desc_firebase_lockup">Firebase logo and name</string>
-    <string name="google_title_text">Google Sign In</string>
+    <string name="title_text">Sign In</string>
     <string name="signed_out">Signed Out</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="apply">Apply</string>
@@ -11,7 +11,7 @@
     <string name="select_image">Select Image</string>
     <string name="image_uploaded">Image Uploaded!!</string>
     <string name="failed_upload">\"Failed to upload \"</string>
-    <string name="use_firebase">Use firebase</string>
+    <string name="use_gravatar">Use Gravatar</string>
     <string name="logout">logout</string>
     <string name="auth_failed">Authentication Failed.</string>
     <string name="room_id">room Id</string>
@@ -35,9 +35,9 @@
     <string name="game_saved">game saved</string>
     <string name="select">Select</string>
     <string name="ok">Ok</string>
-    <string name="win">win</string>
-    <string name="defeat">defeat</string>
     <string name="party_over">Party is over</string>
     <string name="replace_pawn">Replace pawn</string>
+    <string name="win">win</string>
+    <string name="defeat">defeat</string>
 
 </resources>
