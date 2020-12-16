@@ -34,6 +34,7 @@ public class GameViewModel extends AndroidViewModel {
     private Boolean isLocked;
     private String roomPath;
     private boolean isFinished;
+    private int playerFactor;
 
     public GameViewModel(@NonNull Application application) {
         super(application);
@@ -111,6 +112,7 @@ public class GameViewModel extends AndroidViewModel {
 
     public void init(ChessColor player, String roomId) {
         this.player = player;
+        playerFactor = player == ChessColor.BLACK ? 7 : 0;
         this.roomPath = "Rooms/" + roomId;
 
         loadLasGame();
@@ -135,7 +137,8 @@ public class GameViewModel extends AndroidViewModel {
 
         if (snapshot.exists()) {
             for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
-                piecesBox.add(dataSnapshot.getValue(ChessItem.class));
+                ChessItem item = dataSnapshot.getValue(ChessItem.class);
+                piecesBox.add(item);
             }
         }
         else {
@@ -199,6 +202,7 @@ public class GameViewModel extends AndroidViewModel {
                 if (snapshot.exists()) {
                     int fromCol = snapshot.child("col").getValue(int.class);
                     int fromRow = snapshot.child("row").getValue(int.class);
+
                     ChessColor color = snapshot.child("player").getValue(ChessColor.class);
 
                     ChessItem item = items.getItemAt(fromCol, fromRow, color);

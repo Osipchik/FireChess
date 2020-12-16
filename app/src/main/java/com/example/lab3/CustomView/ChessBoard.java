@@ -23,7 +23,6 @@ public class ChessBoard extends View {
     private float cellSide = 130f;
     private final int lightColor;
     private final int darkColor;
-//    private final int playerFactor;
 
     private final Map<Integer, Bitmap> bitmaps = new HashMap<>();
     private final Paint boardPaint = new Paint();
@@ -33,6 +32,7 @@ public class ChessBoard extends View {
 
     private IChessDelegate chessDelegate;
     private ChessColor player;
+    private int playerFactor;
 
     public void setChessDelegate(IChessDelegate chessDelegate) {
         this.chessDelegate = chessDelegate;
@@ -40,6 +40,7 @@ public class ChessBoard extends View {
 
     public void setPlayer(ChessColor player) {
         this.player = player;
+        playerFactor = player == ChessColor.BLACK ? 7 : 0;
     }
 
     public interface IChessDelegate {
@@ -70,6 +71,10 @@ public class ChessBoard extends View {
         loadBitmaps();
     }
 
+    private int getFixedRow(int row) {
+        return Math.abs(playerFactor - row);
+    }
+
     @Override
     public void onDraw(Canvas canvas) {
         float chessBoardSide = Math.min(getWidth(), getHeight());
@@ -88,7 +93,7 @@ public class ChessBoard extends View {
             for (int col = 0; col <= 7; col++) {
                 ChessItem item = chessDelegate.itemAt(col, row);
                 if (item != null) {
-                    canvas.drawBitmap(bitmaps.get(item.resId), null, drawRect(col, row), boardPaint);
+                    canvas.drawBitmap(bitmaps.get(item.resId), null, drawRect(col, getFixedRow(row)), boardPaint);
                 }
             }
         }
@@ -113,7 +118,7 @@ public class ChessBoard extends View {
 
     private void drawHighlightRectangle(Canvas canvas) {
         if (selectedItem != null) {
-            canvas.drawRect(drawRect(selectedItem.getCol(), selectedItem.getRow()), strokePaint);
+            canvas.drawRect(drawRect(selectedItem.getCol(), getFixedRow(selectedItem.getRow())), strokePaint);
         }
     }
 
@@ -130,7 +135,7 @@ public class ChessBoard extends View {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
                 int currentCol = (int) ((x - originX) / cellSide);
-                int currentRow = (int) ((y - originY) / cellSide);
+                int currentRow = getFixedRow((int) ((y - originY) / cellSide));
 
                 ChessItem item = chessDelegate.itemAt(currentCol, currentRow);
                 if (item != null) {

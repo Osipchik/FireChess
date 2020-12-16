@@ -65,8 +65,8 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
         int rowDiff = currentRow - selectedItem.getRow();
         int colDiff = Math.abs(currentCol - selectedItem.getCol());
 
-        if ((viewModel.getPlayer() == ChessColor.WHITE && (rowDiff == 1 || rowDiff == 2) ||
-                viewModel.getPlayer() == ChessColor.BLACK && (rowDiff == -1 || rowDiff == -2)) && colDiff <= 1) {
+        if ((viewModel.getPlayer() == ChessColor.WHITE && (rowDiff == -1 || rowDiff == -2) ||
+                viewModel.getPlayer() == ChessColor.BLACK && (rowDiff == 1 || rowDiff == 2)) && colDiff <= 1) {
 
             ChessItem piece = itemAt(currentCol, currentRow);
             if (piece != null && piece.getPlayer() != viewModel.getPlayer()){
@@ -167,7 +167,7 @@ public class BoardFragment extends Fragment implements ChessBoard.IChessDelegate
     }
 
     private void showPromotionDialog(ChessItem item) {
-        if (item.getPlayer() == ChessColor.WHITE && item.getRow() == 7 || item.getPlayer() == ChessColor.BLACK && item.getRow() == 0){
+        if (item.getPlayer() == ChessColor.WHITE && item.getRow() == 0 || item.getPlayer() == ChessColor.BLACK && item.getRow() == 7){
             PawnPromotionDialog dialog = new PawnPromotionDialog(item);
             dialog.setCancelable(false);
             dialog.show(getFragmentManager(), "ChangePawnDialog");
